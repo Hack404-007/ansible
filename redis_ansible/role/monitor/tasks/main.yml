@@ -1,0 +1,16 @@
+---
+- name: Install redis monitor for nc
+  yum: name={{ item }} state=present
+  with_items:
+   - nc
+- name: Create Monitor Driectory
+  file: path={{ monitor_install_dir }}  state=directory mode=0755
+- name: Install Redis Monitor
+  copy: src=monredis_auto.tar.gz dest=/tmp owner=paas group=users mode=0755
+- name: Extract Redis_monitor
+  unarchive: src=/tmp/monredis_auto.tar.gz dest={{ monitor_install_dir }} owner=paas group=users copy=no mode=0755
+- name: Copy Redis Monitor redis_mon.conf file
+  template: src=redis_mon.conf.j2 dest={{ monitor_install_dir }}/monredis_auto/redis_mon.conf owner=paas group=users mode=0644
+- name: Add crontab job
+  cron: name="Check Redis Process" minute="*/2" user="paas" job="{{ monitor_install_dir }}/monredis_auto/redis_auto.sh > {{ monitor_install_dir }}/monredis_auto/redis_auto.log > /dev/null"
+  notify: restart crond

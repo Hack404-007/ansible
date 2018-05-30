@@ -1,0 +1,8 @@
+---
+- name: Install Redis For Centos 6.x
+  user: root
+  hosts: redis
+  roles:
+   - redis
+   - monitor
+

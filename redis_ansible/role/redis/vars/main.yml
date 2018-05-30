@@ -1,0 +1,5 @@
+---
+redis_version: 3.2.8
+redis_port: 16380
+redis_dir: /usr/local/redis
+redis_user_passwd: 23t6etgf26r26

@@ -1,0 +1,27 @@
+---
+- name: Install Base Package
+  yum: name={{ item }} state=present
+  with_items:
+   - zlib
+   - zlib-devel
+   - openssl
+   - openssl-devel
+   - pcre
+   - pcre-devel
+   - gcc
+   - make
+   - gcc-c++
+   - glibc.i686
+  ignore_errors: True
+- name: Copy redis Package
+  copy: src=redis-{{ redis_version }}.tar.gz  dest=/tmp/redis-{{ redis_version }}.tar.gz
+- name: Create Redis Dir
+  file: path={{ redis_dir }} state=directory mode=0755
+- name: Extract Redis Source Package
+  unarchive: src=/tmp/redis-{{ redis_version }}.tar.gz  dest={{ redis_dir }} copy=no
+- name: Rename Redis item
+  shell: chdir={{ redis_dir }} mv redis {{ redis_item }}
+- name: Copy Redis.conf
+  template: src=redis.conf.j2 dest={{ redis_dir }}/{{ redis_item }}/conf/{{ redis_item }}.conf  owner=paas group=users mode=0644
+- name: Chown Redis User
+  file: path={{ redis_dir }}  owner=paas group=users mode=0755 recurse=yes
