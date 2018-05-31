@@ -1,0 +1,82 @@
+---
+- name: SET HOSTNAME
+  shell: hostnamectl --static set-hostname {{ Hostname }}
+- name: DISABLED SELINUX
+  lineinfile: dest=/etc/sysconfig/selinux regexp="^SELINUX$" line="SELINUX=disabled" state=present
+- name: yum Base Package
+  yum: name={{ item }} state=present
+  with_items:
+   - "bash"
+   - "openssl"
+   - "telnet"
+   - "mysql-libs"
+   - "dos2unix"
+   - "unix2dos"
+   - "tree"
+   - "wget"
+   - "lrzsz"
+   - "curl"
+   - "expect"
+   - "iotop"
+   - "dstat"
+   - "dmidecode"
+   - "bind-utils"
+   - "vim"
+   - "@base"
+   - "*"
+  ignore_errors: True
+- name: TURN OFF SERVICE
+  shell: systemctl disable {{ item }}
+  with_items:
+   - postfix
+   - lvm2-monitor
+   - messagebus
+   - abrt-ccpp
+   - abrt-oops
+   - abrtd
+  ignore_errors: True
+- name: CHANFE HISTORY SIZE
+  lineinfile: dest=/etc/profile regexp="^HISTSIZE" line="HISTSIZE=10000" state=present
+- name: FORMAT HISTORY
+  shell: echo  -e 'export  HISTTIMEFORMAT="$(whoami) %F %T "' >> /etc/profile
+- name: SET BEIJING CLOCK
+  shell: timedatectl set-local-rtc 1 && timedatectl set-timezone Asia/Shanghai
+- name: NTPDATE TIMEZONE
+  cron: name="ntpdate timzone" minute="1" job="/usr/sbin/ntpdate  time.nist.gov"
+- name: UPDATE sysctl.conf TO REMOTE_HOSTS
+  copy: src=sysctl.conf dest=/etc/sysctl.conf owner=root group=root backup=yes mode=0600
+- name: UPDATE limits.conf TO REMOTE_HOSTS
+  copy: src=limits.conf dest=/etc/security/limits.conf backup=yes mode=0644
+- name: SETTING SYSCTL.CONF CONFIGGURE
+  command: sysctl -p
+- name: CHANGE SSH PORT
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^#Port" line="Port 60086" state=present
+  notify: restart sshd
+- name: DISABLED DNS RESOLVE
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^\#UseDNS yes" line="UseDNS no" state=present
+  notify: restart sshd
+- name: ADD SYSTEM USER vboss
+  user: name=vboss group=users
+- name: ADD SYSTEM USER IM
+  user: name=im uid=604  groups=users
+- name: ADD SYSTEM USER PAAS
+  user: name=paas uid=606 groups=users
+- name: ADD SYSTEM USER MESSAGE
+  user: name=message  groups=users
+- name: ADD SYSTEM USER IPCC
+  user: name=ipcc uid=610 groups=users
+- name: ADD SYSTEM USER CONGENRENCE
+  user: name=conference  groups=users
+- name: ADD APP USER NGINX
+  user: name=nginx shell=/sbin/nologin  state=present
+- name: ADD APP USER ZABBIX
+  user: name=zabbix shell=/sbin/nologin  state=present
+- name: CREATE WORK DIR
+  file: name=/opt/{{ item }} state=directory mode=0755 owner={{ item }} group=users
+  with_items:
+   - vboss
+   - message
+   - paas
+   - ipcc
+   - conference
+   - im

@@ -1,0 +1,9 @@
+---
+- name: install libiconv packages
+  unarchive: src=libiconv-1.15.tar.gz dest=/tmp owner=root group=root mode=0755
+- name: configure libiconv
+  shell: chdir={{ libiconv_dir }} {{ libiconv_configure }}
+- name: make and make install libiconv
+  shell: chdir={{ libiconv_dir }} {{ libiconv_make }}
+- name: export libiconv lib path
+  shell: echo "/usr/local/lib/" >> /etc/ld.so.conf && ldconfig  

@@ -1,0 +1,33 @@
+---
+#author by: Tommy
+
+software_files_path: "/usr/local/src"
+software_install_path: "/usr/local"
+
+mysql_version: "5.7.19"
+
+
+mysql_file: "mysql-{{ mysql_version }}.tar.gz"
+mysql_file_path: "{{ software_files_path }}/{{ mysql_file }}"
+
+
+
+mysql_user: "mysql"
+mysql_password: "aYtGMUn1GDEiyL"
+
+mysql_chroot: "{{ software_install_path }}/mysql"
+mysql_data_path: "{{ mysql_chroot }}/data"
+mysql_conf_path: "/etc/"
+
+mysql_sockt_path: "{{ mysql_data_path }}/mysql.sockt"
+mysql_pid_path: "{{ mysql_data_path }}/mysql.pid"
+
+mysql_configure_arg: "cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql -DMYSQL_DATADIR=/usr/local/mysql/data/ -DSYSCONFDIR=/etc -DWITH_MYISAM_STORAGE_ENGINE=1 -DWITH_INNOBASE_STORAGE_ENGINE=1 -DWITH_ARCHIVE_STORAGE_ENGINE=1 -DMYSQL_UNIX_ADDR={{ mysql_sockt_path }} -DWITH_PARTITION_STORAGE_ENGINE=1 -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci -DWITH_EXTRA_CHARSETS=all -DWITH_BOOST=/usr/local/boost_1_59_0"
+
+mysql_init_arg: "/usr/local/mysql/bin/mysqld  --initialize-insecure  --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data"
+
+boost_version: "1_59_0"
+
+boost_file: "boost_{{ boost_version }}.tar.gz"
+boost_file_path: "{{ software_files_path }}/{{ boost_file }}"
+boost_chroot: "{{ software_install_path }}"

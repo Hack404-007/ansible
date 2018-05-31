@@ -1,0 +1,19 @@
+---
+- name: Set slave server-id
+  lineinfile: "dest=/etc/my.cnf  regexp='^server-id' line='server-id={{ slave_server_id }}'"
+  when: mysql_role == "slave"
+  notify: RESTART MYSQLD
+
+- name: Get Mysql-master Status
+  mysql_replication: login_user=root login_password={{ passwd }} login_unix_socket=/usr/local/mysql/data/mysql.sock  mode=getmaster
+  delegate_to: "{{ mysql_master_host }}"
+  register: master_status
+  when: mysql_role == "slave"
+
+- name: Change the master in slave to start the replication
+  mysql_replication: login_user=root login_password={{ passwd }} login_unix_socket=/usr/local/mysql/data/mysql.sock  mode=changemaster master_host={{ mysql_master_host }} master_log_file={{ master_status.File }} master_log_pos={{ master_status.Position }} master_user={{ repl_user }} master_password={{ repl_passwd }}
+  when: mysql_role == "slave"
+
+- name: Start slave
+  mysql_replication: login_user=root login_password={{ passwd }}  login_unix_socket=/usr/local/mysql/data/mysql.sock mode=startslave
+  when: mysql_role == "slave"

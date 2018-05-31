@@ -1,0 +1,91 @@
+[client]
+port = 3306
+socket={{ mysql_sockt_path }}
+
+
+[mysqld]
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
+
+basedir = {{ mysql_chroot }}
+datadir = {{ mysql_data_path}}
+port = 3306
+socket = {{ mysql_sockt_path }}
+character-set-server=utf8
+log-error = /usr/local/mysql/data/mysql.error
+
+back_log = 300
+max_connections = 3000
+max_connect_errors = 50
+table_open_cache = 4096
+max_allowed_packet = 32M
+#binlog_cache_size = 4M
+
+max_heap_table_size = 128M
+read_rnd_buffer_size = 16M
+sort_buffer_size = 16M
+join_buffer_size = 16M
+thread_cache_size = 16
+query_cache_size = 128M
+query_cache_limit = 4M
+ft_min_word_len = 8
+
+thread_stack = 512K
+transaction_isolation = REPEATABLE-READ
+tmp_table_size = 128M
+#log-bin=mysql-bin
+long_query_time = 6
+
+
+server_id=1
+
+{% if ['ansible_memtotal_mb'] < "1024" %}
+innodb_buffer_pool_size = 512M
+{% elif "1024" <= ['ansible_memtotal_mb'] < "2048" %}
+innodb_buffer_pool_size = 1600M
+{% elif "2048" <= ['ansible_memtotal_mb'] < "4096" %}
+innodb_buffer_pool_size = 3200M
+{% elif "4096" <= ['ansible_memtotal_mb'] < "8192" %}
+innodb_buffer_pool_size = 6400M
+{% elif "8192" <= ['ansible_memtotal_mb'] < "16384" %}
+innodb_buffer_pool_size = 12000M
+{% elif "16384" <= ['ansible_memtotal_mb'] < "32768" %}
+innodb_buffer_pool_size = 24000M
+{% elif "32768" <= ['ansible_memtotal_mb'] < "65536" %}
+innodb_buffer_pool_size = 48000M
+{% else %}
+innodb_buffer_pool_size = 1024M
+{% endif %}
+
+innodb_thread_concurrency = {{ ansible_processor_cores }}
+innodb_log_buffer_size = 16M
+
+
+innodb_log_file_size = 512M
+innodb_log_files_in_group = 3
+innodb_max_dirty_pages_pct = 90
+innodb_lock_wait_timeout = 120
+innodb_file_per_table = on
+
+[mysqldump]
+quick
+
+max_allowed_packet = 32M
+
+[mysql]
+no-auto-rehash
+prompt=\\u@\\d \\r:\\m:\\s>
+default-character-set=utf8
+safe-updates
+
+[myisamchk]
+key_buffer = 16M
+sort_buffer_size = 16M
+read_buffer = 8M
+write_buffer = 8M
+
+[mysqlhotcopy]
+interactive-timeout
+
+[mysqld_safe]
+open-files-limit = 8192
+

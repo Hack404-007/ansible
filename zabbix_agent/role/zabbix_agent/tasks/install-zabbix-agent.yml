@@ -1,0 +1,74 @@
+---
+- name: useradd zabbix group
+  group: name=zabbix state=present
+
+- name: useradd zabbix user
+  user: name=zabbix  shell=/sbin/nologin groups=zabbix append=yes
+
+- name: copy zabbix.zip
+  copy: src=zabbix.zip dest=/tmp mode=0755 owner=root group=root
+- name: install zabbix_agent
+  unarchive: src=/tmp/zabbix.zip dest=/usr/local/ owner=zabbix group=zabbix  mode=0644 mode=0755 list_files=yes copy=no
+
+
+- name: Register Hostname
+  shell: hostname
+  register: zone_hostname
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_local.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('BJHLGW')"
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('BJYZ')"
+
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('SZWG')"
+
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('SHWG')"
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('ALY')"
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('ALIYUN')"
+
+- name: configure zabbix-server address
+  template: src=zabbix_agentd_remote.conf.j2  dest=/usr/local/zabbix/etc/zabbix_agentd.conf owner=zabbix group=zabbix mode=0644
+  when: "zone_hostname.stdout.startswith('AWS')"
+
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=BJHLGW'"
+  when: "zone_hostname.stdout.startswith('BJHLGW')"
+
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=BJYZ'"
+  when: "zone_hostname.stdout.startswith('BJYZ')"
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=SZWG'"
+  when: "zone_hostname.stdout.startswith('SZWG')"
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=SHWG'"
+  when: "zone_hostname.stdout.startswith('SHWG')"
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=ALY'"
+  when: "zone_hostname.stdout.startswith('ALY')"
+
+- name: set zabbix agent HostMetal
+  lineinfile: "path=/usr/local/zabbix/etc/zabbix_agentd.conf  regexp='^HostMetadata=' line='HostMetadata=AWS'"
+  when: "zone_hostname.stdout.startswith('AWS')"
+
+- name: start zabbix agentd
+  shell: /usr/local/zabbix/sbin/zabbix_agentd -c /usr/local/zabbix/etc/zabbix_agentd.conf

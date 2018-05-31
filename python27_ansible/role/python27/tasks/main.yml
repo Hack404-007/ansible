@@ -1,0 +1,40 @@
+---
+- name: Install python27 for Centos 6.x
+  yum: name={{ item }} state=present
+  with_items:
+   - zlib-devel 
+   - bzip2-devel 
+   - openssl-devel 
+   - ncurses-devel 
+   - sqlite-devel
+   - gcc 
+   - automake 
+   - autoconf 
+   - libtool 
+   - make
+   - cmake
+   - "@Development tools"
+- name: Install python27
+  copy: src=Python-{{ python_version }}.tgz dest=/tmp/Python-{{ python_version }}.tgz owner=root group=root mode=0755
+- name: Extract Pyhton27 Package
+  unarchive: src=/tmp/Python-{{ python_version }}.tgz dest=/tmp/ owner=root group=root copy=no mode=0755
+- name: configure python27
+  shell: chdir=/tmp/Python-{{ python_version }} {{ configure }}
+- name: Make and Make install
+  shell: chdir=/tmp/Python-{{ python_version }} make && make install
+
+- name: Install setuptools
+  copy: src=setuptools-{{ setuptools_version }}.tar.gz dest=/tmp/setuptools-{{ setuptools_version }}.tar.gz owner=root group=root mode=0755
+- name: Extract setuptools  Package
+  unarchive: src=/tmp/setuptools-{{ setuptools_version }}.tar.gz dest=/tmp owner=root group=root copy=no mode=0755
+- name: configure setuptools
+  shell: chdir=/tmp/setuptools-{{ setuptools_version }}  /usr/local/python27/bin/python setup.py  install
+
+- name: Install Pip for python27
+  copy: src=pip-{{ pip_version }}.tar.gz dest=/tmp/pip-{{ pip_version }}.tar.gz owner=root group=root mode=0755
+- name: Extract pip  Package
+  unarchive: src=/tmp/pip-{{ pip_version }}.tar.gz dest=/tmp/ owner=root group=root copy=no mode=0755
+- name: configure pip
+  shell: chdir=/tmp/pip-{{ pip_version }}  /usr/local/python27/bin/python setup.py  install
+- name: Export Pip Path
+  file: src=/usr/local/python27/bin/pip  dest=/usr/bin/pip state=link

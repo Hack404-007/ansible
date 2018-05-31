@@ -1,0 +1,30 @@
+---
+- name: Install Nginx HA for Centos 6.x
+  yum: name={{ item }} state=present
+  with_items:
+   - "openssl"
+   - "gcc"
+   - "gcc-c++"
+   - "openssl-devel"
+   - "popt-devel"
+   - "popt-static"
+   - "openssl-static"
+   - "openssl098e"
+  ignore_errors: True
+- name: COPY KEEPALIVED PACKAGE
+  copy: src=keepalived-{{ keepalived_version }}.tar.gz dest=/tmp/
+- name: EXTRACT KEEPALIVED SOURCE PACKAGE
+  unarchive: src=/tmp/keepalived-{{ keepalived_version }}.tar.gz  dest=/tmp copy=no
+- name: CONFUGURE KEEPALIVED
+  command: chdir=/tmp/keepalived-{{ keepalived_version }} {{ configure }}
+- name: MAKE KEEPALIVED
+  command: chdir=/tmp/keepalived-{{ keepalived_version }} make
+- name: MAKE INSTALL KEEPALIVED
+  command: chdir=/tmp/keepalived-{{ keepalived_version }} make install
+- name: LOAD LIB
+  command: ldconfig
+- name: COPY KEEPALIVED CONF FILE
+  template: src=keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf
+  notify: restart keepalived service
+- name: CHKCONFIG KEEPALIVED ON
+  service: name=keepalived state=started enabled=on

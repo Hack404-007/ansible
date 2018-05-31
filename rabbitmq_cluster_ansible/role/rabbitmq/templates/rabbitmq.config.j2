@@ -1,0 +1,13 @@
+[
+  {rabbit, [
+	{default_vhost, <<"/">>},
+    {default_user, <<"admin">>},
+    {default_pass, <<"1a2s3d4f5g6h7j">>},
+    {default_permissions, [<<".*">>, <<".*">>, <<".*">>]},
+    {default_user_tags, [administrator]},
+    {cluster_nodes, {['rabbit@node1', 'rabbit@node2'], disc}},
+	{hipe_compile, true},
+	{vm_memory_high_watermark_paging_ratio, 0.75},
+	{vm_memory_high_watermark, 0.4}
+  ]}
+].

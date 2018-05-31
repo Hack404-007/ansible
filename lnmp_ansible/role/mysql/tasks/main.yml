@@ -1,0 +1,52 @@
+---
+- name: COPY MySQL PACKAGE TO REMOTE_HOSTS
+  unarchive: src=mysql-{{ mysql_version }}.tar.gz dest=/tmp
+
+- name: ADD MySQL GROUP
+  group: name=mysql gid=27 state=present
+- name: ADD MySQL USER
+  user: name=mysql group=mysql uid=27 shell=/sbin/nologin home=/home/mysql
+- name: INSTALL MySQL PACKAGE
+  yum: name={{ item }} state=present
+  with_items:
+   - zlib
+   - zlib-devel
+   - cmake
+   - gcc
+   - ncurses-devel
+   - libxml2-devel
+   - libtool
+   - gcc-c++
+   - autoconf
+   - automake
+   - bison-devel
+   - zlib-devel
+  ignore_errors: True
+- name: INSTALL MySQL
+  shell: chdir=/tmp/mysql-{{ mysql_version }} {{ cmake }} 
+- name: MAKE INSTALL MySQL
+  shell: chdir=/tmp/mysql-{{ mysql_version }} make && make install
+- name: CHANGE OWNER OF MySQL DIRECTORY
+  file: path=/usr/local/mysql owner=mysql group=mysql state=directory recurse=yes
+- name: CHANGE OWNER OF MySQL DATADIR
+  file: path=/usr/local/mysql/data owner=mysql group=mysql state=directory recurse=yes
+- name: COPY MY.CNF TO REMOTE_HOSTS
+  template: src=my.cnf.j2 dest=/etc/my.cnf owner=mysql group=mysql
+  notify: RESTART MYSQLD
+- name: EXPORT MYSQL_INSTALL_DIR
+  file: src=/usr/local/mysql/bin/* dest=/usr/bin/* state=link force=yes
+- name: INIT MySQL DATABASES
+  shell: /usr/local/mysql/scripts/mysql_install_db --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --user=mysql
+- name: INSTALL MySQL INIT SCRIPTS
+  shell: /bin/cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld && chmod 755 /etc/init.d/mysqld
+- name: START MySQL SERVICE
+  service: name=mysqld state=started enabled=yes
+- name: DATABASE SECURITY
+  shell: /usr/local/mysql/bin/mysql {{ item }}
+  with_items:
+   - -e "UPDATE mysql.user SET password=password('{{ passwd }}') where Host='localhost' and User='root';"
+   - -e "UPDATE mysql.user SET password=password('{{ passwd }}') where Host='127.0.0.1' and User='root';"
+   - -e "DELETE FROM mysql.user WHERE password='';"
+   - -e "DROP DATABASE test;"
+   - -e "FLUSH PRIVILEGES;"
+  notify: RESTART MYSQLD

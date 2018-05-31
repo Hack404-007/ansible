@@ -1,0 +1,2 @@
+keepalived_version: 1.2.18
+configure: ./configure --prefix=/usr --exec-prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --sysconfdir=/etc --datadir=/usr/share --includedir=/usr/include --libdir=/usr/lib64 --libexecdir=/usr/libexec --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --sharedstatedir=/usr/com --with-kernel-dir=/usr/src/linux 

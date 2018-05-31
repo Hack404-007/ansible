@@ -1,0 +1,7 @@
+---
+# author by: Tommy
+- name: Install MySQL 5.7 for CentOs 6.x
+  user: root
+  hosts: db
+  roles:
+   - mysql

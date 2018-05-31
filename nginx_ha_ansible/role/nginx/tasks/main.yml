@@ -1,0 +1,43 @@
+---
+- name: INSTALL  NGINX PACKAGE
+  yum: name={{ item }} state=present
+  with_items:
+   - zlib
+   - zlib-devel
+   - openssl
+   - openssl-devel
+   - pcre
+   - pcre-devel
+   - gcc
+   - make
+  ignore_errors: True
+
+- name: ADD GROUP "nginx"
+  group: name=nginx
+- name: ADD USER "nginx"
+  user: name=nginx group=nginx home=/home/nginx shell=/sbin/nologin
+- name: CREATE CLIENT TMP DIRECTORY
+  file: dest=/usr/local/nginx/tmp/client state=directory
+- name: COPY NGINX PACKAGE
+  copy: src=nginx-{{ nginx_version }}.tar.gz dest=/tmp/nginx-{{ nginx_version }}.tar.gz
+- name: EXTRACT NGINX SOURCE PACKAGE
+  unarchive: src=/tmp/nginx-{{ nginx_version }}.tar.gz  dest=/tmp copy=no
+- name: CONFUGURE NGINX
+  command: chdir=/tmp/nginx-{{ nginx_version }} {{ configure }}
+- name: MAKE NGINX
+  command: chdir=/tmp/nginx-{{ nginx_version }} make
+- name: MAKE INSTALL NGINX
+  command: chdir=/tmp/nginx-{{ nginx_version }} make install
+- name: CREATE WEBDATA DIRECTORY
+  file: dest=/opt/vboss/webdata state=directory
+- name: COPY NGINX.CONF TO REMOTE_HOSTS
+  template: src=nginx.conf.j2 dest=/usr/local/nginx/conf/nginx.conf owner=nginx group=nginx backup=yes
+  notify: RESTART NGINX
+- name: COPY NGINX_INIT SCRIPTS TO REMORE_HOSTS
+  copy: src=nginx dest=/etc/init.d/nginx mode=0755
+- name: COPY NGINX CUT LOG SCRIPTS
+  copy: src=nginx_log_cut.sh dest=/usr/local/nginx/sbin/ mode=755
+- name: ADD CRONTAB SERVICE
+  cron: name="nginx cut log" minute="0" hour="0" job="sh /usr/local/nginx/sbin/nginx_log_cut.sh > /dev/null"
+- name: START NGINX Service
+  service: name=nginx state=started enabled=yes

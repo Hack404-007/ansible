@@ -1,0 +1,33 @@
+---
+# author by: Tommy
+
+- name:  Install base package
+  yum: name={{ item }} state=present
+  with_items:
+   - "cmake"
+   - "ncurses-devel"
+   - "gcc"
+   - "gcc-c++"
+   - "autoconf"
+   - "automake"
+   - "zlib"
+   - "libxml"
+   - "libgcrypt"
+   - "libtool"
+  ignore_errors: True
+
+- name: copy software package to remote server
+  copy: src={{ item }} dest={{ software_files_path }}  owner=root group=root mode=0644
+  with_items:
+   - "{{ mysql_file }}"
+   - "{{ boost_file }}"
+
+- name: Install boost
+  unarchive: src={{ software_files_path }}/{{ boost_file }} dest=/usr/local/ owner=root group=root copy=no mode=0755
+
+- name: Add MySQL user
+  user: name=mysql shell=/sbin/nologin state=present
+- name: Create MySQL install_Dir andso that directory being to MySQL user
+  file: path={{ mysql_chroot }} state=directory mode=0755 owner=mysql group=mysql
+- name: Create MySQL data_Dir and so that directory being to MySQL user
+  file: path={{ mysql_data_path }} state=directory mode=0755 owner=mysql group=mysql

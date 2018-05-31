@@ -1,0 +1,4 @@
+---
+- include: kill_zabbix_24.yml
+- include: install-libiconv.yml
+- include: install-zabbix-agent.yml

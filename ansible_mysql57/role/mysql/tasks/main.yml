@@ -1,0 +1,5 @@
+---
+# author by: Tommy
+- include: prepare.yml
+- include: install.yml
+- include: initialize.yml

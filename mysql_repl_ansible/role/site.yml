@@ -1,0 +1,7 @@
+- name: Install MySQL and Replcation
+  user: root
+  hosts: db
+  roles:
+   - common
+   - mysql-master
+   - mysql-slave 

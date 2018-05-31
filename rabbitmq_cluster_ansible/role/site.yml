@@ -1,0 +1,5 @@
+- name: Rabbitmq 2 nodes install  for centos 6.x
+  user: root
+  hosts: mq
+  roles:
+   - rabbitmq

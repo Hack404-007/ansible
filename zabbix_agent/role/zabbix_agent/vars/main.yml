@@ -1,0 +1,6 @@
+---
+libiconv_dir: /tmp/libiconv-1.15
+libiconv_configure: ./configure --prefix=/usr/local
+libiconv_make: make && make install
+zabbix_local_ip:  zabbix-lan.51yzx.com
+zabbix_remote_ip: zabbix-wan.51yzx.com

@@ -1,0 +1,6 @@
+- name: nginx keepalived for centos 6.x
+  user: root
+  hosts: ha
+  roles:
+   - nginx
+   - keepalived

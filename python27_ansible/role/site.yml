@@ -1,0 +1,6 @@
+---
+- name: Install Python27 For Centos 6.x
+  user: root
+  hosts: python27
+  roles:
+   - python27 

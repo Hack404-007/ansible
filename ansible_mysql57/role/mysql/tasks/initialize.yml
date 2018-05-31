@@ -1,0 +1,24 @@
+---
+# author by: Tommy
+- name: init MySQL database
+  shell: "{{ mysql_init_arg }}"
+- name: init scripts
+  shell: chdir={{ mysql_chroot }} cp ./support-files/mysql.server  /etc/init.d/mysqld
+- name: chmod 0755
+  file: path=/etc/init.d/mysqld owner=root group=root mode=0755
+- name: copy my.cnf file
+  template: src=my.cnf.j2 dest={{ mysql_conf_path }}/my.cnf force=yes owner=root group=root
+- name: chown being mysql user
+  file: path={{ mysql_chroot }} owner=mysql group=mysql recurse=yes
+- name: start MySQL service
+  service: name=mysqld state=started enabled=yes
+- name: export mysql
+  copy: src=mysql.sh dest=/etc/profile.d/ owner=root group=root mode=0755
+#- name: MySQL password
+#  shell: cat ~/.mysql_secret
+#  register: mysql_init_password 
+- name: MySQL Security Setting
+  shell: /usr/local/mysql/bin/mysql -uroot  -S {{ mysql_sockt_path }}  {{ item }}
+  with_items:
+   - -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '"{{ mysql_password }}"';"
+  notify: restart mysqld

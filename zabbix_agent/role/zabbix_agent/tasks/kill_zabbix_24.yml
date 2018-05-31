@@ -1,0 +1,7 @@
+---
+- name: kill zabbix_agentd process
+  shell: killall zabbix_agentd
+  ignore_errors: True
+- name: backup zabbix 24 version
+  shell: chdir=/usr/local mv zabbix  zabbix_24_$(date +%F)
+  ignore_errors: True

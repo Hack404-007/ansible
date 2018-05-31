@@ -1,0 +1,101 @@
+---
+- name: SET HOSTNAME
+  hostname: name={{ Hostname }}
+- name: SET HOSTNAME FILE
+  lineinfile: "dest=/etc/sysconfig/network state=present  regexp='^HOSTNAME' line='HOSTNAME={{ Hostname }}'"
+ - name: Set Hostname HostIP
+  shell: echo  "{{ ansible_all_ipv4_addresses[0] }} {{ Hostname }}" >> /etc/hosts
+- name: DISABLED SELINUX
+  lineinfile: dest=/etc/sysconfig/selinux regexp="^SELINUX=" line="SELINUX=disabled" state=present
+- name: DELETE COBBLEER REPL
+  shell: rm -f /etc/yum.repos.d/cobbler-config.repo
+- name: yum Base Package
+  yum: name={{ item }} state=present
+  with_items:
+   - "epel-release"
+   - "bash"
+   - "openssl"
+   - "telnet"
+   - "mysql-libs"
+   - "dos2unix"
+   - "unix2dos"
+   - "tree"
+   - "wget"
+   - "lrzsz"
+   - "curl"
+   - "expect"
+   - "iotop"
+   - "dstat"
+   - "dmidecode"
+   - "bind-utils"
+   - "vim"
+   - "@base"
+   - "*"
+  ignore_errors: True
+- name: TURN OFF SERVICE
+  service: name={{ item }} enabled=no state=stopped
+  with_items:
+   - postfix
+   - lvm2-monitor
+   - messagebus
+   - quota_nld
+   - iptables
+   - ip6tables
+   - abrt-ccpp
+   - abrt-oops
+   - abrtd
+   - ntpd
+  ignore_errors: True
+- name: SET VI TO VIM
+  shell: grep vim  $HOME/.bashrc || sed  -i "/mv/aalias vi='vim'"  $HOME/.bashrc
+- name: SET ZABBIXRESTART COMMAND
+  shell:grep zabbix  $HOME/.bashrc || sed  -i "/mv/aalias zabbix-restart='killall zabbix_agentd  && /usr/local/zabbix/sbin/zabbix_agentd -c /usr/local/zabbix/etc/zabbix_agentd.conf  && echo zabbix_agentd restart success. &&  ps aux |grep zabbix_agentd  ' "  $HOME/.bashrc
+- name: CHANFE HISTORY SIZE
+  lineinfile: dest=/etc/profile regexp="^HISTSIZE" line="HISTSIZE=10000" state=present
+- name: FORMAT HISTORY
+  shell: echo  -e 'export  HISTTIMEFORMAT="$(whoami) %F %T "' >> /etc/profile
+- name: SET BEIJING CLOCK
+  file: src=/usr/share/zoneinfo/Asia/Shanghai dest=/etc/localtime owner=root group=root state=link force=yes
+- name: NTPDATE TIMEZONE
+  cron: name="ntpdate timzone" minute="1" job="/usr/sbin/ntpdate  time.nist.gov"
+- name: UPDATE sysctl.conf TO REMOTE_HOSTS
+  template: src=sysctl.conf dest=/etc/sysctl.conf owner=root group=root backup=yes mode=0600
+- name: UPDATE limits.conf TO REMOTE_HOSTS
+  template: src=limits.conf dest=/etc/security/limits.conf backup=yes mode=0644
+- name: UPDATE "90-nproc.conf" TO REMOTE_HOSTS
+  template: src="90-nproc.conf" dest=/etc/security/limits.d/ owner=root group=root backup=yes mode=0644
+- name: SETTING SYSCTL.CONF CONFIGGURE
+  command: sysctl -p
+- name: CHANGE SSH PORT
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^#Port" line="Port 60086" state=present
+  notify: restart sshd
+- name: DISABLED DNS RESOLVE
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^\#UseDNS yes" line="UseDNS no" state=present
+  notify: restart sshd
+- name: ADD UCPAASADMIN USER
+  user: name=ucpaasadmin  shell=/bin/bash groups=wheel uid=700   password=$1$hpirQXVu$4pWs3OPcPQTK6pnXn3kXc
+- name: ADD SYSTEM USER vboss
+  user: name=vboss group=users
+- name: ADD SYSTEM USER IM
+  user: name=im uid=604  groups=users
+- name: ADD SYSTEM USER PAAS
+  user: name=paas uid=606 groups=users
+- name: ADD SYSTEM USER MESSAGE
+  user: name=message  groups=users
+- name: ADD SYSTEM USER IPCC
+  user: name=ipcc uid=610 groups=users
+- name: ADD SYSTEM USER CONGENRENCE
+  user: name=conference  groups=users
+- name: ADD APP USER NGINX
+  user: name=nginx shell=/sbin/nologin  state=present
+- name: ADD APP USER ZABBIX
+  user: name=zabbix shell=/sbin/nologin  state=present
+- name: CREATE WORK DIR
+  file: name=/opt/{{ item }} state=directory mode=0755 owner={{ item }} group=users
+  with_items:
+   - vboss
+   - message
+   - paas
+   - ipcc
+   - conference
+   - im

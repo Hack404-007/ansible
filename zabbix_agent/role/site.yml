@@ -1,0 +1,6 @@
+---
+- name: install zabbix agent 34
+  user: root
+  hosts: all
+  roles:
+   - zabbix_agent

@@ -1,0 +1,41 @@
+---
+- name: Copy Centos6 and Crntos7 EPEL
+  copy: src={{ item }} dest=/tmp
+  with_items:
+   - epel-release-6-8.noarch.rpm
+   - epel-release-latest-7.noarch.rpm
+
+- name: Install ELEP for Centos6
+  yum: name=/tmp/{{ item }} state=present
+  with_items:
+   - epel-release-6-8.noarch.rpm
+  when: ansible_distribution_major_version == "6"
+
+- name: Install ELEP for Centos6
+  yum: name=/tmp/epel-release-latest-7.noarch.rpm state=present
+  when: ansible_distribution_major_version == "7"
+
+- name: COPY MySQL PACKAGE TO REMOTE_HOSTS
+  unarchive: src=mysql-{{ mysql_version }}.tar.gz dest=/tmp
+- name: ADD MySQL GROUP
+  group: name=mysql gid=27 state=present
+- name: ADD MySQL USER
+  user: name=mysql group=mysql uid=27 shell=/sbin/nologin home=/home/mysql
+- name: INSTALL MySQL PACKAGE
+  yum: name={{ item }} state=present
+  with_items:
+   - zlib
+   - zlib-devel
+   - cmake
+   - gcc
+   - gc
+   - ncurses-devel
+   - libxml2-devel
+   - libtool
+   - gcc-c++
+   - autoconf
+   - automake
+   - bison-devel
+   - zlib-devel
+   - mysql-devel
+   - python-devel
