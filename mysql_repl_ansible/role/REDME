@@ -1,7 +1,7 @@
 [all:vars]
 ansible_ssh_user='root'
 ansible_ssh_pass='passwd'
-ansible_ssh_port='60086'
+ansible_ssh_port='22'
 Hostmetadata='ALYTEST'
 
 [db:vars]
